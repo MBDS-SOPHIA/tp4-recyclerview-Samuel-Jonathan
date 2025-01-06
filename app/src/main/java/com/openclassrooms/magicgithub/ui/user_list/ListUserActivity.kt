@@ -4,16 +4,19 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.openclassrooms.magicgithub.R
+import com.openclassrooms.magicgithub.databinding.ActivityListUserBinding
 import com.openclassrooms.magicgithub.di.Injection.getRepository
 import com.openclassrooms.magicgithub.model.User
 
 class ListUserActivity : AppCompatActivity(), UserListAdapter.Listener {
     // FOR DESIGN ---
-    lateinit var recyclerView: RecyclerView
-    lateinit var fab: FloatingActionButton
+    private lateinit var binding: ActivityListUserBinding
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var fab: FloatingActionButton
 
     // FOR DATA ---
     private lateinit var adapter: UserListAdapter
@@ -21,7 +24,11 @@ class ListUserActivity : AppCompatActivity(), UserListAdapter.Listener {
     // OVERRIDE ---
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_list_user)
+
+        // Initialisation du ViewBinding
+        binding = ActivityListUserBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
         configureFab()
         configureRecyclerView()
     }
@@ -33,13 +40,42 @@ class ListUserActivity : AppCompatActivity(), UserListAdapter.Listener {
 
     // CONFIGURATION ---
     private fun configureRecyclerView() {
-        recyclerView = findViewById(R.id.activity_list_user_rv)
+        recyclerView = binding.activityListUserRv
         adapter = UserListAdapter(this)
         recyclerView.adapter = adapter
+
+        val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
+            ItemTouchHelper.UP or ItemTouchHelper.DOWN, // Pour déplacer les éléments
+            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT // Swipe pour activer/désactiver
+        ) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                val fromPosition = viewHolder.adapterPosition
+                val toPosition = target.adapterPosition
+                adapter.swapItems(fromPosition, toPosition) // Déplacement des éléments
+                return true
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.adapterPosition
+                val user = adapter.getUserAtPosition(position)
+
+                // Basculer le statut actif/inactif
+                getRepository().toggleUserStatus(user)
+
+                // Mise à jour de la liste pour refléter le changement
+                adapter.notifyItemChanged(position) // Mise à jour spécifique de l'élément
+            }
+        })
+        itemTouchHelper.attachToRecyclerView(recyclerView)
     }
 
+
     private fun configureFab() {
-        fab = findViewById(R.id.activity_list_user_fab)
+        fab = binding.activityListUserFab
         fab.setOnClickListener(View.OnClickListener { view: View? ->
             getRepository().addRandomUser()
             loadData()

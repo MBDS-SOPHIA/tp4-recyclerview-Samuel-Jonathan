@@ -7,11 +7,13 @@ import com.openclassrooms.magicgithub.model.User
 import com.openclassrooms.magicgithub.repository.UserRepository
 import org.junit.Assert
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import java.util.Collections
 
 /**
  * Unit test, which will execute on a JVM.
@@ -55,4 +57,24 @@ class UserRepositoryTest {
         userRepository.deleteUser(userToDelete)
         Assert.assertFalse(userRepository.getUsers().contains(userToDelete))
     }
+
+    @Test
+    fun toggleUserStatusWithSuccess() {
+        val user = userRepository.getUsers()[0]
+        val initialStatus = user.isActive
+        userRepository.toggleUserStatus(user)
+        assertNotEquals(initialStatus, user.isActive)
+    }
+
+    @Test
+    fun swapItemsWithSuccess() {
+        val initialList = userRepository.getUsers().toMutableList()
+        val firstUser = initialList[0]
+        val secondUser = initialList[1]
+
+        Collections.swap(initialList, 0, 1)
+        assertEquals(secondUser, initialList[0])
+        assertEquals(firstUser, initialList[1])
+    }
+
 }

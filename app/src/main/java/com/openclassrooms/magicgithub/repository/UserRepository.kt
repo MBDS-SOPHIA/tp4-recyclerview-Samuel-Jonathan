@@ -20,4 +20,10 @@ class UserRepository(
         // Implémentation : Supprime un utilisateur
         apiService.deleteUser(user)
     }
+
+    fun toggleUserStatus(user: User) {
+        user.isActive = !user.isActive // Inverse l'état actif/inactif
+    }
+
+
 }
