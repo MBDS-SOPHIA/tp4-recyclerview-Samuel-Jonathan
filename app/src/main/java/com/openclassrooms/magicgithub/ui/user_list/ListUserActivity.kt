@@ -88,7 +88,6 @@ class ListUserActivity : AppCompatActivity(), UserListAdapter.Listener {
 
     // ACTIONS ---
     override fun onClickDelete(user: User) {
-        Log.d(ListUserActivity::class.java.name, "User tries to delete a item.")
         getRepository().deleteUser(user)
         loadData()
     }

@@ -14,7 +14,7 @@ class UserListAdapter(  // FOR CALLBACK ---
     private val callback: Listener
 ) : RecyclerView.Adapter<ListUserViewHolder>() {
     // FOR DATA ---
-    private var users: List<User> = ArrayList()
+    private var users = mutableListOf<User>()
 
     interface Listener {
         fun onClickDelete(user: User)
@@ -37,16 +37,16 @@ class UserListAdapter(  // FOR CALLBACK ---
     // PUBLIC API ---
     fun updateList(newList: List<User>) {
         val diffResult = DiffUtil.calculateDiff(UserDiffCallback(newList, users))
-        users = newList
+        users.clear() // Efface les anciens éléments
+        users.addAll(newList) // Ajoute les nouveaux éléments
         diffResult.dispatchUpdatesTo(this)
     }
 
     fun swapItems(fromPosition: Int, toPosition: Int) {
-        val mutableList = users.toMutableList()
-        Collections.swap(mutableList, fromPosition, toPosition)
-        users = mutableList
+        Collections.swap(users, fromPosition, toPosition) // Modification directe
         notifyItemMoved(fromPosition, toPosition)
     }
+
 
     fun getUserAtPosition(position: Int): User {
         return users[position]
